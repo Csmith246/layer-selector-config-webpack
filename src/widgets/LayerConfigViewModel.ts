@@ -43,10 +43,10 @@ class LayerConfigViewModel extends declared(Accessor) {
   supportedLayerTypes: __esri.Collection<string> = new Collection(["map-image", "feature"]);
 
   @property()
-  supportedGeomTypes: __esri.Collection<string> = new Collection(["esriGeometryPoint", "esriGeometryLine", "esriGeometryPolyline", "esriGeometryPolygon"]);
+  // supportedGeomTypes: __esri.Collection<string> = new Collection(["esriGeometryPoint", "esriGeometryLine", "esriGeometryPolyline", "esriGeometryPolygon"]);
   // supportedGeomTypes: __esri.Collection<string> = new Collection(["esriGeometryLine", "esriGeometryPolyline"]);
   // supportedGeomTypes: __esri.Collection<string> = new Collection(["esriGeometryPolygon"]);
-  // supportedGeomTypes: __esri.Collection<string> = new Collection(["esriGeometryPoint"]);
+  supportedGeomTypes: __esri.Collection<string> = new Collection(["esriGeometryPoint"]);
 
   @property({
     type: Boolean

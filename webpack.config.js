@@ -71,7 +71,7 @@ module.exports = {
     }),
 
     new HtmlWebPackPlugin({
-      title: "ArcGIS Template Application",
+      title: "Layer Selector Config Widget DEV",
       template: "./src/index.html",
       filename: "./index.html",
       favicon: "./src/assets/favicon.ico",
