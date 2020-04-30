@@ -32,6 +32,7 @@ $include_Zoom: true !default;
 
 @import "~arcgis-js-api/themes/light/main.scss";
 @import "index";
+@import "../../node_modules/@esri/calcite-components/dist/calcite/calcite.css";
 
 
 #configPanelContainer {
