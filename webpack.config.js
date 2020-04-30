@@ -3,6 +3,7 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
+const stencil = require('@stencil/webpack');
 
 const path = require("path");
 
@@ -14,6 +15,7 @@ module.exports = {
     filename: "[name].[chunkhash].js",
     publicPath: ""
   },
+  devtool: 'inline-source-map',
   optimization: {
     minimizer: [
       new TerserPlugin({
@@ -82,7 +84,9 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: "[name].[chunkhash].css",
       chunkFilename: "[id].css"
-    })
+    }),
+
+    new stencil.StencilPlugin()
   ],
   resolve: {
     modules: [
