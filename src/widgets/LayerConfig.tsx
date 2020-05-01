@@ -389,7 +389,7 @@ And of geometry:
       });
     
     const fieldModal: any = 
-    <calcite-modal aria-labelledby="field-selector-modal" size="medium" disableEscape="false">
+    <calcite-modal size="medium" disableEscape="false" onclick={(e:any)=>{e.stopPropagation()}}>
       <h3 slot="header" id="modal-title">Select Fields</h3>
       <div slot="content" class={CSS.fieldModalDisplay}>
         {fieldCheckboxes}
