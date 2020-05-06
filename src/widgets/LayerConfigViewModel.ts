@@ -216,23 +216,30 @@ class LayerConfigViewModel extends declared(Accessor) {
 
 
   fieldSelectionCancel(uniqueId: string, fieldCheckboxes: any[]){
-    console.log("layer", uniqueId);
-    console.log("fieldCheckboxes", fieldCheckboxes);
-    // 1. find State in Map
-      // if doesn't exsit then clear all selection for field Checkboxes
-      // else reinstate state for field Checkboxes
-    let fieldNames = this.fieldState.get(uniqueId);
-    if(fieldNames == null){
-      // reset all checkboxes to unchecked
-      fieldCheckboxes.forEach((checkbox)=>{ checkbox.domNode.checked = false; })
-    }else{
-      fieldCheckboxes.forEach((checkbox)=>{ checkbox.domNode.checked = fieldNames?.includes(checkbox.domNode.value) ? true: false })
-    }
+    
+    /// Actually don't need this method anymore - because checkboxes "checked" property is 
+    /// always recalculated on new render by seeing if the fieldName has already been 
+    /// selected and is in the fieldName state. So in order to cancel, just don't save any changes
+    /// to the checkboxes that were made.
+
+    // console.log("layer", uniqueId);
+    // console.log("fieldCheckboxes", fieldCheckboxes);
+    // // 1. find State in Map
+    //   // if doesn't exsit then clear all selection for field Checkboxes
+    //   // else reinstate state for field Checkboxes
+    // let fieldNames = this.fieldState.get(uniqueId);
+    // if(fieldNames == null){
+    //   // reset all checkboxes to unchecked
+    //   fieldCheckboxes.forEach((checkbox)=>{ checkbox.domNode.checked = false; })
+    // } else{
+    //   fieldCheckboxes.forEach((checkbox)=>{ checkbox.domNode.checked = fieldNames?.includes(checkbox.domNode.value) ? true: false })
+    // }
   }
 
-  fieldSelectionSave(uniqueId: string, fieldCheckboxes: any){
+  fieldSelectionSave(uniqueId: string, fieldCheckboxes: __esri.Collection<string>){
     // update State in Map to match fieldCheckboxes
     // update OutputJSON
+    console.log("SAVING FIELDS");
     let fieldNames = this.fieldState.get(uniqueId);
     if(fieldNames == null){
       fieldNames = new Collection();
@@ -241,15 +248,21 @@ class LayerConfigViewModel extends declared(Accessor) {
       fieldNames.removeAll();
     }
 
+    // fieldNames.addMany(
+    //   fieldCheckboxes
+    //     .filter((checkbox: any)=>{ return checkbox?.children?.[0]?.domNode?.checked })
+    //     .map((checkbox: any)=>{ return checkbox?.children?.[0]?.domNode?.value })
+    // );
+
     fieldNames.addMany(
       fieldCheckboxes
-        .filter((checkbox: any)=>{ return checkbox.domNode.checked })
-        .map((checkbox: any)=>{ return checkbox.domNode.value })
     );
+
+    this.createJsonOutput();
   }
 
 
-  createUniqueLayerId(layer: __esri.Layer | __esri.Sublayer): string{
+  createUniqueLayerId(layer: __esri.Layer | __esri.Sublayer): string {
     // "type" is defined on Layer, but not on Sublayer
     return layer["type"] != null ? layer.id as string : `${(layer as __esri.Sublayer).layer.id}_${layer.id}`;
   }
@@ -262,8 +275,13 @@ class LayerConfigViewModel extends declared(Accessor) {
   }
 
 
-  isLayerSelected(layer: __esri.Layer | __esri.Sublayer):boolean{
+  isLayerSelected(layer: __esri.Layer | __esri.Sublayer):boolean {
     return this.multiSelectState.includes(layer);
+  }
+
+  isFieldSelected(uniqueId: string, fieldName: string): boolean {
+    const selectedFields: __esri.Collection<any> = this.fieldState.get(uniqueId);
+    return selectedFields != null ? selectedFields.includes(fieldName) : false;
   }
 
 

@@ -1,3 +1,5 @@
+@import "../../../node_modules/@esri/calcite-components/dist/calcite/calcite.css";
+
 $layer-left-margin: 20px;
 
 .display-none {
@@ -14,27 +16,32 @@ $layer-left-margin: 20px;
                                     supported by Chrome, Opera and Firefox */
 }
 
-.dark-icon-style{
+// input{
+//     display: none;
+// }
+
+.dark-icon-style {
     color: rgb(117, 117, 117);
 }
 
-.renderLineBreaks{
+.renderLineBreaks {
     white-space: break-spaces;
     // text-align: center;
     // z-index: 10;
 }
 
-.light-blue-color{
+.light-blue-color {
     color: rgb(116, 181, 255);
 }
 
-.grey-color{
+.grey-color {
     color: rgb(130, 130, 130);
 }
 
 .esri-layer-picker-config {
     overflow: scroll;
     padding: 20px;
+    position: relative;
 
     .esri-layer-picker-config__flex-display {
         display: flex;
@@ -43,7 +50,7 @@ $layer-left-margin: 20px;
         align-items: center;
     }
 
-    .esri-layer-picker-config__row-styles{
+    .esri-layer-picker-config__row-styles {
         display: flex;
         justify-content: space-between;
 
@@ -51,10 +58,9 @@ $layer-left-margin: 20px;
         border-top: $border-style;
         padding: 10px 0px;
 
-        &:last-child{
+        &:last-child {
             border-bottom: $border-style;
         }
-
     }
 
     .esri-layer-picker-config__layer {
@@ -71,7 +77,7 @@ $layer-left-margin: 20px;
         // }
     }
 
-    .esri-layer-picker-config__selectable-layer{
+    .esri-layer-picker-config__selectable-layer {
         @extend .noselect;
         cursor: pointer;
 
@@ -103,15 +109,14 @@ $layer-left-margin: 20px;
         margin: 0px;
     }
 
-    .esri-layer-picker-config__main-layer-display{
+    .esri-layer-picker-config__main-layer-display {
         margin-left: $layer-left-margin;
         width: 100%;
     }
 
-    .esri-layer-picker-config__width{
+    .esri-layer-picker-config__width {
         width: 100%;
     }
-
 
     .esri-layer-picker-config__sublayer-display {
         display: flex;
@@ -126,20 +131,26 @@ $layer-left-margin: 20px;
         }
     }
 
-    .esri-layer-picker-config__radio-btns{
+    .esri-layer-picker-config__radio-btns {
         cursor: pointer;
     }
 
-    .esri-layer-picker-config__checkbox{
+    .esri-layer-picker-config__checkbox {
         margin: 0px 5px;
+
+        // width: 14px;
+        // height: 14px;
+        // background: rgb(0, 120, 194);
+        // border: 1px solid rgb(0, 121, 193);
+        // border-radius: 0px;
     }
-    
-    .esri-layer-picker-config__layers-spacing{
+
+    .esri-layer-picker-config__layers-spacing {
         margin-left: 10px;
         margin-right: 8px;
     }
 
-    .esri-layer-picker-config__field-button{
+    .esri-layer-picker-config__field-button {
         font-size: 0.7rem;
         margin-right: 10px;
         cursor: pointer;
@@ -153,14 +164,13 @@ $layer-left-margin: 20px;
         // line-height: 16.35px;
     }
 
-    .esri-layer-picker-config__field-modal-display{
+    .esri-layer-picker-config__field-modal-display {
         display: flex;
         // width: 100%;
         flex-wrap: wrap;
 
-        & > *{
+        & > * {
             width: 150px;
         }
     }
-
 }

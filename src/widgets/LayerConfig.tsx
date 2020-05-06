@@ -1,12 +1,8 @@
 /// <amd-dependency path="esri/core/tsSupport/assignHelper" name="__assign" />
 /// <amd-dependency path="esri/core/tsSupport/declareExtendsHelper" name="__extends" />
 
-import "./styles/LayerConfig.scss";
-import "@esri/calcite-components";
+////*** Esri Imports ***////
 
-import { friendlyLayerNames, friendlyGeometryNames } from './LayerConfigAssets';
-
-// esri.core.accessorSupport
 import {
   subclass,
   declared,
@@ -14,56 +10,49 @@ import {
   aliasOf
 } from "esri/core/accessorSupport/decorators";
 
-//esri.widgets.support
 import {
   renderable,
   tsx
 } from "esri/widgets/support/widget";
 
-// dojo.118n
-// import i18n = require("dojo/i18n!./SearchConfig/nls/resources");
-
-// esri.widgets.Widget
 import Widget = require("esri/widgets/Widget");
-
-// esri.core.watchUtils
 import watchUtils = require("esri/core/watchUtils");
-
-// esri/WebMap
 import WebMap = require("esri/WebMap");
-
-// esri/Layer
 import Layer = require("esri/layers/Layer");
 
-// widgets/LayerConfigViewModel
+
+////*** Interior Widget Imports ***////
+
+// import i18n = require("dojo/i18n!./SearchConfig/nls/resources");
+
 import LayerConfigViewModel = require("./LayerConfigViewModel");
-// import { VNode, JSX } from '@esri/calcite-components/dist/types/stencil-public-runtime';
+import FieldSelector = require("./FieldSelector");
+import StateStore = require('./stateStore');
+import { friendlyLayerNames, friendlyGeometryNames, RouterStates, USE_SUBLAYER_KEY } from './LayerConfigAssets';
 
-// import LCViewModelExport = require("./LayerConfigViewModel");
-// const LayerConfigViewModel = LCViewModelExport.LayerConfigViewModel;
-// const USE_SUBLAYER_KEY = LCViewModelExport.USE_SUBLAYER_KEY;
 
-// import USE_SUBLAYER_KEY = require("./LayerConfigViewModel");
+////*** Style imports ***////
+import "./styles/LayerConfig.scss";
+import "@esri/calcite-components";
 
-const USE_SUBLAYER_KEY = "USE_SUBLAYER_KEY";
 
 //----------------------------------
 //
 //  CSS Classes
-//esri-search-config__source-list-table
+//
 //----------------------------------
 const CSS = {
   base: "esri-layer-picker-config",
   flexContainer: "esri-layer-picker-config__flex-display",
   flexRow: "esri-layer-picker-config__flex-row",
   rowStylesAndSpacing: "esri-layer-picker-config__row-styles",
-  displayNone: "display-none",
   mainLayerDisplay: "esri-layer-picker-config__main-layer-display",
   sublayerDisplay: "esri-layer-picker-config__sublayer-display",
-  lightBlueColoration: "light-blue-color",
   layersIconSpacing: "esri-layer-picker-config__layers-spacing",
-  greyColor: "grey-color",
   widthFull: "esri-layer-picker-config__width",
+  greyColor: "grey-color",
+  displayNone: "display-none",
+  lightBlueColoration: "light-blue-color",
 
   layerItemStyle: "esri-layer-picker-config__layer",
   selectableLayerItemStyle: "esri-layer-picker-config__selectable-layer",
@@ -105,40 +94,46 @@ class LayerConfig extends declared(Widget) {
   //
   //----------------------------------
 
+  /** Reference to the Webmap from which layers are being picked */
+  @renderable()
+  loadedWebMap: WebMap;
 
-  // //----------------------------------
-  // //
-  // //  configItems
-  // //
-  // //----------------------------------
-  // @aliasOf("viewModel.configItems")
-  // @renderable()
-  // configItems: Collection<LocatorConfigItem | LayerConfigItem> = null;
+  /** Decides which page is being shown */
+  @aliasOf("stateStore.router")
+  @property()
+  @renderable()
+  router: RouterStates;
 
-  //----------------------------------
-  //
-  //  viewModel
-  //
-  //----------------------------------
+  /** Indicates if the details for the Webmap layers are being loaded */
+  @aliasOf("viewModel.areLayersDetailsLoading")
+  @property()
+  @renderable()
+  areLayersDetailsLoading: boolean;
+
+  /** Message displayed in info tooltip */
+  filterTooltipMsg: string;
+
+  /** Global State Store */
+  @property()
+  stateStore = new StateStore();
+
+  /** ViewModel of LayerConfig */
   @renderable([
     "viewModel.acceptableLayers"
   ])
   @property({
     type: LayerConfigViewModel
   })
-  viewModel: LayerConfigViewModel = new LayerConfigViewModel();
+  viewModel: LayerConfigViewModel = new LayerConfigViewModel({
+    stateStore: this.stateStore
+  });
 
-
-  @renderable()
-  loadedWebMap: WebMap;
-
-  @aliasOf("viewModel.areLayersDetailsLoading")
+  /** FieldSelector Page */
   @property()
-  @renderable()
-  areLayersDetailsLoading: boolean;
-
-
-  filterTooltipMsg: string;
+  fieldSelector = new FieldSelector({
+    layerConfigViewModel: this.viewModel,
+    stateStore: this.stateStore
+  });
 
 
   //----------------------------------
@@ -161,16 +156,18 @@ class LayerConfig extends declared(Widget) {
 
       this.viewModel.loadLayerDetails(acceptableLayers);
 
-      // todo: listener clean up
       watchUtils.whenFalseOnce(this.viewModel, "areLayersDetailsLoading", () => {
         let finalAcceptableLayers = acceptableLayers.filter(this.viewModel.filterByGeomType.bind(this.viewModel));
         this.viewModel.acceptableLayers = finalAcceptableLayers;
+        this.scheduleRender();
       });
     });
 
     // todo: listener clean up
     this.viewModel.watch("outputJSON", (val) => {
-      console.log("New OutputJSON Value:", JSON.stringify(val))
+      console.log("New OutputJSON Value:");
+      console.table(val.layers);
+      // console.log("New OutputJSON Value:", JSON.stringify(val))
     });
 
     this._setupFilterInfoTooltip();
@@ -178,22 +175,18 @@ class LayerConfig extends declared(Widget) {
   }
 
   render() {
-    // console.log("loadedWM render:", this.loadedWebMap);
-
     return (
       <div class={this.classes(CSS.base, CSS.flexContainer)}>
-
-        <div class={CSS.flexRow}>
-          <header>Layers</header>{/* todo: nls */}
-          <calcite-tooltip class={CSS.renderLineBreaks} placement="left-start" reference-element="tooltip-filter-info">{this.filterTooltipMsg}</calcite-tooltip>
-          <calcite-tooltip-manager>
-            <calcite-icon id="tooltip-filter-info" class={CSS.lightBlueColoration} icon="information" scale="s"></calcite-icon>
-          </calcite-tooltip-manager>
-        </div>
-        {this._renderLayerItems()}
+        {
+          this.router === "FieldSelector" ?
+            this.fieldSelector.render()
+            :
+            this._renderLayerSelector()
+        }
       </div>
     );
   }
+
   //----------------------------------
   //
   //  Public Methods
@@ -211,6 +204,22 @@ class LayerConfig extends declared(Widget) {
   //
   //----------------------------------
 
+  private _renderLayerSelector() {
+    const rootLayerSelector =
+      (<div>
+        <div class={CSS.flexRow}>
+          <header>Layers</header>{/* todo: nls */}
+          <calcite-tooltip class={CSS.renderLineBreaks} placement="left-start" reference-element="tooltip-filter-info">{this.filterTooltipMsg}</calcite-tooltip>
+          <calcite-tooltip-manager>
+            <calcite-icon id="tooltip-filter-info" class={CSS.lightBlueColoration} icon="information" scale="s"></calcite-icon>
+          </calcite-tooltip-manager>
+        </div>
+        {this._renderLayerItems.call(this)}
+      </div>);
+
+    return rootLayerSelector;
+  }
+
   private _setupFilterInfoTooltip() {
     this.filterTooltipMsg = `Showing layers of type:
     •  ${this.viewModel.allowedLayerTypes.map(layerType => friendlyLayerNames.get(layerType)).join("\n    •  ")}
@@ -220,6 +229,7 @@ And of geometry:
   }
 
   private _renderLayerItems() {
+    // console.log("RENDER LAYER");
     if (this.areLayersDetailsLoading) {
       return <div>Loading...</div>;
     } else {
@@ -235,6 +245,7 @@ And of geometry:
     }
   }
 
+  /** Renders a single layer item based on the layer type */
   private _renderLayerItem(
     layer: Layer,
     sourceItemIndex: number
@@ -263,13 +274,11 @@ And of geometry:
     let selectionType = this._decideSelectionType(id, layer);
     return [
       <label for={id} class={this.classes(CSS.selectableLayerItemStyle, CSS.layerItemStyle, CSS.mainLayerDisplay)} >
-        { selectionType }
+        {selectionType}
         <span class={this.classes(CSS.calciteStyles.featureLayerIcon, CSS.greyColor)} />
-        {/* <calcite-icon class={CSS.darkIconStyle} icon="layer" scale="m"></calcite-icon> */}
         <span>{layer.title}</span>
       </label>,
-      // this.viewModel.isLayerSelected(layer) ? this._renderFieldSelector(layer, "layer") : null 
-      this._renderFieldSelector(layer, "layer") 
+      this._renderFieldSelectorToggle(layer)
     ];
   }
 
@@ -314,12 +323,12 @@ And of geometry:
     return (
       <div class={this.classes(CSS.flexRow)}>
         <label for={divKey} class={this.classes(CSS.selectableLayerItemStyle, CSS.widthFull)} key={divKey}>
-          { selectionType }
+          {selectionType}
           <span class={CSS.calciteStyles.featureLayerIcon} />
           <span>{sublayer.title}</span>
         </label>
         {/* {this.viewModel.isLayerSelected(sublayer) ? this._renderFieldSelector(sublayer, "sublayer") : null } */}
-        { this._renderFieldSelector(sublayer, "sublayer") }
+        {this._renderFieldSelectorToggle(sublayer)}
       </div>
     );
   }
@@ -352,84 +361,40 @@ And of geometry:
 
   private _renderCheckBox(id: string, layer: __esri.Layer | __esri.Sublayer) {
     return (
-      <calcite-checkbox class={CSS.checkboxStyle}>
+      // <calcite-checkbox>
         <input
           bind={this}
-          class={CSS.displayNone}
+          class={CSS.checkboxStyle}
+          checked={this.viewModel.isLayerSelected(layer)}
           id={id}
           onchange={this.viewModel._handleMultipleLayerSelectionChange.bind(this.viewModel, layer)}
           type="checkbox"
           name="checkboxSelection"
-        // checked={this.viewModel.layerItemToBeConfigured.withinViewEnabled}
+          slot
         />
-      </calcite-checkbox>
+      // </calcite-checkbox>
     );
   }
 
-  private _renderFieldSelector(layer: __esri.Layer | __esri.Sublayer, layerType: "layer" | "sublayer") {
+  private _renderFieldSelectorToggle(layer: __esri.Layer | __esri.Sublayer) {
     const uniqueId: string = this.viewModel.createUniqueLayerId(layer);
-
-    const cancelBtn: any = <calcite-button slot="secondary" width="full" appearance="outline">Cancel</calcite-button>
-    const confirmBtn: any = <calcite-button slot="primary" width="full">Confirm</calcite-button>
-    const fieldCheckboxes =
-      layer["fields"].map((field:__esri.Field, index: number)=>{
-        return (<calcite-checkbox class={CSS.checkboxStyle} tabIndex={index}>
-        <input
-          bind={this}
-          class={CSS.displayNone}
-          id={uniqueId}
-          value={field.name}
-          // onchange={this.viewModel._handleMultipleLayerSelectionChange.bind(this.viewModel, layer)}
-          type="checkbox"
-          name="checkboxSelection"
-          tabIndex={index}
-        />
-          {field.name}
-        </calcite-checkbox>);
-      });
-    
-    const fieldModal: any = 
-    <calcite-modal size="medium" disableEscape="false" onclick={(e:any)=>{e.stopPropagation()}}>
-      <h3 slot="header" id="modal-title">Select Fields</h3>
-      <div slot="content" class={CSS.fieldModalDisplay}>
-        {fieldCheckboxes}
-      </div>
-      {cancelBtn}
-      {confirmBtn}
-    </calcite-modal>;
 
     return (
       <span
         class={this.classes(CSS.lightBlueColoration, CSS.fieldButtonStyle, !this.viewModel.isLayerSelected(layer) ? CSS.displayNone : "")}
-        onclick={this._openFieldSelectorModal.bind(this, uniqueId, fieldModal, cancelBtn, confirmBtn, fieldCheckboxes)}
+        onclick={this._openFieldSelector.bind(this, layer, uniqueId)}
       >
         Field
-        {fieldModal}
+        {/* {fieldModal} */}
       </span>
     );
   }
 
 
-  private _openFieldSelectorModal(uniqueId: string, fieldModal: any, cancelBtn: any, confirmBtn: any, fieldCheckboxes: any) {
-    fieldModal.domNode.open();
-
-    (cancelBtn as any).domNode.onclick = (e: MouseEvent)=>{
-      e.stopPropagation();
-      fieldModal.domNode.close();
-
-      // need to reinstatiate the state of when modal was initially opened
-      this.viewModel.fieldSelectionCancel(uniqueId, fieldCheckboxes);
-    };
-
-    (confirmBtn as any).domNode.onclick = (e: MouseEvent)=>{
-      e.stopPropagation();
-      fieldModal.domNode.close();
-
-      // save field selections
-      this.viewModel.fieldSelectionSave(uniqueId, fieldCheckboxes);
-
-      this.viewModel.createJsonOutput();
-    };
+  private _openFieldSelector(layer: __esri.Layer | __esri.Sublayer, uniqueId: string) {
+    this.stateStore.router = "FieldSelector";
+    this.fieldSelector.setupFields(layer, uniqueId);
+    this.scheduleRender();
   }
 
 
@@ -451,12 +416,24 @@ And of geometry:
    * - [X] Work on output json - should look like the old one
    * 
    * 
-   * --- Friday 5/1 ---
+   * --- Tuesday May 5th ---
    * 
-   * 1. [ ] test with variety of layer types
-   * 2. [ ] Work on json input - what should it look like?
-   * 3. [ ] filter on layer capabilities
-   * 4. [ ] nls
+   * 1. [X] make in-panel field selector
+   *    [X] Check logic that refactored today
+   *    - Work on Styling
+   *      - Test it with Calcite Checkboxes - then maybe report the issue (ask Kelly 1st?) - https://github.com/Esri/calcite-components/issues/283 - https://github.com/Esri/calcite-components/issues/234 
+   *      - Checkboxes
+   *      - field selector styling
+   *      - radio buttons
+   *      - Other Styling ideas:
+   *        - MIL and TLs, slight underline of main item to show that something beneath it is checked.
+   *        - Field button - styling on that to indicate if the Field Selection for that layer needs to be done still.
+   * 
+   * . [ ] Work on json input - what should it look like?
+   * . [ ] nls
+   * 
+   * . [ ] test with variety of layer types
+   * . [ ] filter on layer capabilities
    * 
    */
 

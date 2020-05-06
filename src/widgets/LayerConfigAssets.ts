@@ -12,6 +12,8 @@ export interface ILayerDef{
     fields?: string[];
 }
 
+export type RouterStates = "LayerSelector" | "FieldSelector";
+
 /////////////////////
 /// Layer Types
 /////////////////////

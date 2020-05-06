@@ -1,6 +1,6 @@
 {
   "name": "layer-selector-dev",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "devDependencies": {
     "@stencil/webpack": "0.0.6",
     "@theintern/istanbul-loader": "^1.0.0-beta.2",

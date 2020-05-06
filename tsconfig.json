@@ -3,7 +3,7 @@
     "module": "amd",
     "lib": ["dom", "es2015.promise", "es5", "es6"],
     "target": "es5",
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "removeComments": true,
     "jsx": "react",
     "jsxFactory": "tsx",
@@ -15,7 +15,7 @@
     "noLib": false,
     "preserveConstEnums": true,
     "suppressImplicitAnyIndexErrors": true,
-    "strictNullChecks": true,
+    "strictNullChecks": false,
 
     "outDir": "./dist/",
     "sourceMap": true,
