@@ -2,7 +2,29 @@
 // should be shown or not in the pick list, based on the geom (and other) filters
 export const USE_SUBLAYER_KEY = "USE_SUBLAYER_KEY";
 
-export interface IOutputJSON{
+
+/////////////////////
+/// Input Interfaces
+/////////////////////
+export interface IInputObject{
+    layerSelectorConfig: {
+        selectionType: "single" | "multiple",
+        supportedLayerTypes: ELayerTypes[],
+        supportedGeometryTypes: EGeometryTypes[]
+    },
+    fieldSelectorConfig: {
+        supportFieldSelection: boolean;
+        selectionType: "single" | "multiple",
+        supportedFieldTypes: EFieldTypes[]
+    },
+    savedState: IOutputObject;
+}
+
+/////////////////////
+/// Output Interfaces
+/////////////////////
+
+export interface IOutputObject{
     layers: ILayerDef[];
 }
 
@@ -12,7 +34,12 @@ export interface ILayerDef{
     fields?: string[];
 }
 
+
+/////////////////////
+/// RouterStates
+/////////////////////
 export type RouterStates = "LayerSelector" | "FieldSelector";
+
 
 /////////////////////
 /// Layer Types
@@ -56,4 +83,13 @@ const geometryNames: [EGeometryTypes, string][] = [
 export const friendlyGeometryNames: Map<EGeometryTypes, string> = new Map();
 geometryNames.forEach(geometryName => friendlyGeometryNames.set(geometryName[0], geometryName[1]))
 
-
+/////////////////////
+/// Field Types
+/////////////////////
+export enum EFieldTypes{
+    String = "esriFieldTypeString",
+    SmallInt = "esriFieldTypeSmallInteger",
+    Integer = "esriFieldTypeInteger",
+    Single = "esriFieldTypeSingle",
+    Double = "esriFieldTypeDouble"
+}

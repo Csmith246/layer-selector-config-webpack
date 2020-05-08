@@ -67,9 +67,17 @@ class FieldSelector extends declared(Widget) {
   render() {
     return (
       <div id="fieldsContainer">
-        <div id="header" key="title">Select Fields for: <strong>{this.chosenLayer.title}</strong></div>
+        <div id="header" key="title">
+          <div>
+            Select Fields for: <strong>{this.chosenLayer.title}</strong>
+          </div>
+          <calcite-button appearance="transparent" color="dark" title="Cancel"
+            icon="x" scale="l" onclick={this.cancel.bind(this)}></calcite-button>
+        </div>
         <div id="fields" key="fields">
-          {this._renderFieldCheckboxes()}
+          <calcite-pick-list multiple filter-enabled={true}>
+            {this._renderFieldCheckboxes()}
+          </calcite-pick-list>
         </div>
         <div id="footer" key="buttons">
           <calcite-button key="cancel" appearance="outline" onclick={this.cancel.bind(this)}>Cancel</calcite-button>
@@ -112,29 +120,23 @@ class FieldSelector extends declared(Widget) {
     console.log("RE-render box!", isSelected);
 
     return (
-      <label for={this.uniqueId + index} class={isSelected ? "selectedField" : ""}>
-        <input
-          bind={this}
-          // class={CSS.checkboxStyle}
-          key={this.uniqueId + index}
-          id={this.uniqueId + index}
-          value={field.name}
-          checked={isSelected}
-          type="checkbox"
-          name="checkboxSelection"
-          onchange={this._handleCheckboxClick.bind(this, field)}
-        // tabIndex={index}
-        />
-        <div class="flex-col-class">
-          <div>
-            {field.alias}
-          </div>
-          <div>
-            {`{${field.name}}`}
-          </div>
-        </div>
-      </label>
+      <calcite-pick-list-item
+        text-label={field.alias}
+        text-description={`{${field.name}}`}
+        value={field.name}
+        selected={isSelected}
+        afterCreate={this._setupOnClickEvent.bind(this, field)}
+      ></calcite-pick-list-item>
     );
+  }
+
+  private _setupOnClickEvent(field: __esri.Field, elem: Element) {
+    // this.own(
+      (elem as HTMLCalcitePickListElement).addEventListener("calciteListItemChange", (e) => {
+        console.log("IN picklist event listener");
+        this._handleCheckboxClick.call(this, field, e);
+      });
+    // )
   }
 
   private cancel() {
@@ -148,7 +150,7 @@ class FieldSelector extends declared(Widget) {
 
   private _handleCheckboxClick(field: __esri.Field, e: MouseEvent) {
     console.log("Checkbox click", e);
-    const checked: boolean = e.target["checked"];
+    const checked: boolean = e.target["selected"]; // Note: selected is the calcite-pick-list-item property
     if (checked) {
       this.selectedFields.add(field.name);
     } else {

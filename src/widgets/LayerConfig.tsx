@@ -1,8 +1,11 @@
 /// <amd-dependency path="esri/core/tsSupport/assignHelper" name="__assign" />
 /// <amd-dependency path="esri/core/tsSupport/declareExtendsHelper" name="__extends" />
 
-////*** Esri Imports ***////
 
+////*** Style imports ***////
+import "./styles/LayerConfig.scss";
+
+////*** Esri Imports ***////
 import {
   subclass,
   declared,
@@ -20,20 +23,16 @@ import watchUtils = require("esri/core/watchUtils");
 import WebMap = require("esri/WebMap");
 import Layer = require("esri/layers/Layer");
 
+////*** Calcite Imports ***////
+import "@esri/calcite-components";
+import '@esri/calcite-app-components';
 
 ////*** Interior Widget Imports ***////
-
 // import i18n = require("dojo/i18n!./SearchConfig/nls/resources");
-
 import LayerConfigViewModel = require("./LayerConfigViewModel");
 import FieldSelector = require("./FieldSelector");
 import StateStore = require('./stateStore');
 import { friendlyLayerNames, friendlyGeometryNames, RouterStates, USE_SUBLAYER_KEY } from './LayerConfigAssets';
-
-
-////*** Style imports ***////
-import "./styles/LayerConfig.scss";
-import "@esri/calcite-components";
 
 
 //----------------------------------
@@ -53,6 +52,9 @@ const CSS = {
   greyColor: "grey-color",
   displayNone: "display-none",
   lightBlueColoration: "light-blue-color",
+  featureLayerIconSpacing: "esri-layer-picker-config__FL-icon-spacing",
+  sublayerSpacing: "esri-layer-picker-config__sublayer-spacing",
+  layerDisplayPadding: "esri-layer-picker-config__layer-display-padding",
 
   layerItemStyle: "esri-layer-picker-config__layer",
   selectableLayerItemStyle: "esri-layer-picker-config__selectable-layer",
@@ -93,6 +95,8 @@ class LayerConfig extends declared(Widget) {
   //  Variables
   //
   //----------------------------------
+
+  inputJSON;
 
   /** Reference to the Webmap from which layers are being picked */
   @renderable()
@@ -272,14 +276,17 @@ And of geometry:
   private _renderFeatureLayerItem(layer: __esri.FeatureLayer, sourceItemIndex: number): any {
     let id = `${layer.title}_${sourceItemIndex}`;
     let selectionType = this._decideSelectionType(id, layer);
-    return [
-      <label for={id} class={this.classes(CSS.selectableLayerItemStyle, CSS.layerItemStyle, CSS.mainLayerDisplay)} >
-        {selectionType}
-        <span class={this.classes(CSS.calciteStyles.featureLayerIcon, CSS.greyColor)} />
-        <span>{layer.title}</span>
-      </label>,
-      this._renderFieldSelectorToggle(layer)
-    ];
+    return (
+      <div class={this.classes(CSS.flexRow, CSS.widthFull)}>
+        <label for={id} class={this.classes(CSS.selectableLayerItemStyle, CSS.layerItemStyle, CSS.mainLayerDisplay, CSS.widthFull)} >
+          {selectionType}
+          <calcite-icon id="featureLayerIcon" class={CSS.featureLayerIconSpacing} icon="layer" theme="dark" scale="m"></calcite-icon>
+          {/* <span class={this.classes(CSS.calciteStyles.featureLayerIcon, CSS.greyColor)} /> */}
+          <span>{layer.title}</span>
+        </label>
+        {this._renderFieldSelectorToggle(layer)}
+      </div>
+    );
   }
 
   private _renderMapImageItem(layer: __esri.MapImageLayer, sourceItemIndex: number): any {
@@ -296,7 +303,7 @@ And of geometry:
         >
           <calcite-icon icon={isExpanded ? "chevron-down" : "chevron-right"} scale="m"></calcite-icon>
           <calcite-icon icon="layers" scale="m" class={CSS.layersIconSpacing}></calcite-icon>
-          <span>{layer.title}</span>
+          <span class={CSS.layerDisplayPadding}>{layer.title}</span>
         </div>
         <div class={isExpanded ? CSS.sublayerDisplay : CSS.displayNone}>
           {this._renderSublayerItems(layer)}
@@ -321,10 +328,11 @@ And of geometry:
     let selectionType = this._decideSelectionType(divKey, sublayer);
 
     return (
-      <div class={this.classes(CSS.flexRow)}>
-        <label for={divKey} class={this.classes(CSS.selectableLayerItemStyle, CSS.widthFull)} key={divKey}>
+      <div class={this.classes(CSS.flexRow, CSS.sublayerSpacing)}>
+        <label for={divKey} class={this.classes(CSS.selectableLayerItemStyle, CSS.widthFull, CSS.flexRow)} key={divKey}>
           {selectionType}
-          <span class={CSS.calciteStyles.featureLayerIcon} />
+          {/* <span class={CSS.calciteStyles.featureLayerIcon} /> */}
+          <calcite-icon id="featureLayerIcon" class={CSS.featureLayerIconSpacing} icon="layer" scale="m"></calcite-icon>
           <span>{sublayer.title}</span>
         </label>
         {/* {this.viewModel.isLayerSelected(sublayer) ? this._renderFieldSelector(sublayer, "sublayer") : null } */}
@@ -361,8 +369,9 @@ And of geometry:
 
   private _renderCheckBox(id: string, layer: __esri.Layer | __esri.Sublayer) {
     return (
-      // <calcite-checkbox>
+      <calcite-checkbox checked={this.viewModel.isLayerSelected(layer)}>
         <input
+          key={"checkbox"}
           bind={this}
           class={CSS.checkboxStyle}
           checked={this.viewModel.isLayerSelected(layer)}
@@ -372,7 +381,7 @@ And of geometry:
           name="checkboxSelection"
           slot
         />
-      // </calcite-checkbox>
+      </calcite-checkbox>
     );
   }
 
@@ -380,14 +389,30 @@ And of geometry:
     const uniqueId: string = this.viewModel.createUniqueLayerId(layer);
 
     return (
-      <span
+      <calcite-button
+        appearance="transparent"
+        icon={!this.viewModel.areFieldsSelectedForLayer(uniqueId) ? "" : "list-check"}
+        scale="xs"
         class={this.classes(CSS.lightBlueColoration, CSS.fieldButtonStyle, !this.viewModel.isLayerSelected(layer) ? CSS.displayNone : "")}
         onclick={this._openFieldSelector.bind(this, layer, uniqueId)}
       >
         Field
-        {/* {fieldModal} */}
-      </span>
+      </calcite-button>
     );
+    // return (
+    //   <span
+    //     class={this.classes(CSS.lightBlueColoration, CSS.fieldButtonStyle, !this.viewModel.isLayerSelected(layer) ? CSS.displayNone : "")}
+    //     onclick={this._openFieldSelector.bind(this, layer, uniqueId)}
+    //   >
+    //     Field
+    //     {/* {fieldModal} */}
+    //     <calcite-icon
+    //       class={this.classes(CSS.lightBlueColoration, !this.viewModel.areFieldsSelectedForLayer(uniqueId) ? CSS.displayNone : "")}
+    //       icon="list-check" scale="s"
+    //     >
+    //     </calcite-icon>
+    //   </span>
+    // );
   }
 
 
@@ -429,9 +454,12 @@ And of geometry:
    *        - MIL and TLs, slight underline of main item to show that something beneath it is checked.
    *        - Field button - styling on that to indicate if the Field Selection for that layer needs to be done still.
    * 
-   * . [ ] Work on json input - what should it look like?
+   * . [X] Work on json input - what should it look like?
+   * - [ ] Hook up inputs to work properly
+   *   - [ ] make a set of sample inputs, to show during next meeting
+   * - [ ] passing in savedState and reinstanitating from that
    * . [ ] nls
-   * 
+   *      
    * . [ ] test with variety of layer types
    * . [ ] filter on layer capabilities
    * 

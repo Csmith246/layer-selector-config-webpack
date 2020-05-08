@@ -1,6 +1,8 @@
 @import "../../../node_modules/@esri/calcite-components/dist/calcite/calcite.css";
 
-$layer-left-margin: 20px;
+$layer-left-margin: 27px;
+
+$layer-display-top-bottom-padding: 5px; 
 
 .display-none {
     display: none;
@@ -81,8 +83,7 @@ $layer-left-margin: 20px;
         @extend .noselect;
         cursor: pointer;
 
-        padding-left: 10px;
-        padding-right: 10px;
+        padding: $layer-display-top-bottom-padding 10px;
 
         // color: rgb(126, 126, 126);
         color: rgb(130, 130, 130);
@@ -92,6 +93,15 @@ $layer-left-margin: 20px;
         //     font-weight: bold;
         //     border-radius: 5px;
         // }
+
+        // &:hover{
+        //     background-color: darken(white, 10%);
+        //     border-radius: 5px;
+        // }
+    }
+
+    .esri-layer-picker-config__layer-display-padding{
+        padding: $layer-display-top-bottom-padding 0px;
     }
 
     .esri-layer-picker-config__flex-row {
@@ -173,4 +183,12 @@ $layer-left-margin: 20px;
             width: 150px;
         }
     }
+
+    .esri-layer-picker-config__FL-icon-spacing{
+        margin: 0px 6px;
+    }
+
+    // .esri-layer-picker-config__sublayer-spacing{
+    //     padding: 4px 0px;
+    // }
 }

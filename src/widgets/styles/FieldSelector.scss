@@ -1,6 +1,6 @@
-$height-header: 50px;
+$height-header: 70px;//auto;
 $height-fields: auto;
-$height-footer: 100px;
+$height-footer: 56px;//auto;
 
 $border-line-color: rgba(230, 230, 230, 0.692);
 
@@ -23,6 +23,10 @@ $border-line-color: rgba(230, 230, 230, 0.692);
 }
 
 #header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
   border-bottom: solid $border-line-color 1px;
   margin: 5px;
 }
@@ -37,19 +41,20 @@ $border-line-color: rgba(230, 230, 230, 0.692);
 
   & > * {
     @extend .noselect;
-    cursor: pointer;
+    // cursor: pointer;
     // max-width: 300px;
-    width: 80%;
-    margin: 4px;
-    padding: 5px 20px;
-    border: solid darken($border-line-color, 50%) 1px;
-    border-radius: 10px;
+    width: 100%;
+    // margin: 4px;
+    // padding: 5px 20px;
+    // border-right: solid darken($border-line-color, 50%) 1px;
+    // border-left: solid darken($border-line-color, 50%) 1px;
+    // border-radius: 10px;
   }
 
-  & input {
-    margin-top: 15px;
-    cursor: pointer;
-  }
+  // & input {
+  //   margin-top: 15px;
+  //   cursor: pointer;
+  // }
   
 }
 

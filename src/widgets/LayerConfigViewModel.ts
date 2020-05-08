@@ -5,7 +5,7 @@
 // assets
 import { 
   USE_SUBLAYER_KEY,
-  IOutputJSON,
+  IOutputObject,
   ILayerDef,
   ELayerTypes,
   EGeometryTypes
@@ -118,7 +118,7 @@ class LayerConfigViewModel extends declared(Accessor) {
   //----------------------------------
 
   @property()
-  outputJSON: IOutputJSON;
+  outputJSON: IOutputObject;
 
 
   //----------------------------------
@@ -282,6 +282,11 @@ class LayerConfigViewModel extends declared(Accessor) {
   isFieldSelected(uniqueId: string, fieldName: string): boolean {
     const selectedFields: __esri.Collection<any> = this.fieldState.get(uniqueId);
     return selectedFields != null ? selectedFields.includes(fieldName) : false;
+  }
+
+  areFieldsSelectedForLayer(uniqueId: string): boolean {
+    const selectedFields: __esri.Collection<any> = this.fieldState.get(uniqueId);
+    return selectedFields != null && selectedFields.length > 0;
   }
 
 

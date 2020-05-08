@@ -1,6 +1,7 @@
 import "./config";
 
 import "@esri/calcite-components/dist/calcite.js";
+import '@esri/calcite-app-components/dist/calcite-app.js';
 
 import ArcGISWebMap from "esri/WebMap";
 import MapView from "esri/views/MapView";
